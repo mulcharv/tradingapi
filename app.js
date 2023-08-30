@@ -173,6 +173,7 @@ passport.use(new LocalStrategy(
     const url = `https://api.marketstack.com/v1/tickers/${req.params.stockid}/intraday/latest?access_key=${marketstack}&interval=15min`;
     const response = await fetch(url);
     const data = await response.json();
+    console.log(data)
 
     if (data.error) {
       res.status(404).json({message: "Invalid symblol", status: 404})
@@ -196,7 +197,7 @@ passport.use(new LocalStrategy(
   }
   }));
 
-app.get('stocks/:stockid/:interval', passport.authenticate('jwt',  {session: false}), asyncHandler(async(req, res, next) => {
+app.get('/stocks/:stockid/:interval', passport.authenticate('jwt',  {session: false}), asyncHandler(async(req, res, next) => {
   const currDate = new Date();
   const currDateNum = currDate.getTime();
   const firstDate = req.params.interval;
