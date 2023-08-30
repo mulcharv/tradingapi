@@ -183,7 +183,7 @@ passport.use(new LocalStrategy(
   }))
 
   //Get information on stock ticker
-  app.get('stocks/:stockid/info', passport.authenticate('jwt',  {session: false}), asyncHandler(async(req, res, next) => {
+  app.get('/stocks/:stockid/info', passport.authenticate('jwt',  {session: false}), asyncHandler(async(req, res, next) => {
     const url = `https://api.marketstack.com/v1/tickers/${req.params.stockid}?access_key=${marketstack}`;
     const response = await fetch(url);
     const data = await response.json();
