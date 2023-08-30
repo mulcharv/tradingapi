@@ -173,12 +173,11 @@ passport.use(new LocalStrategy(
     const url = `https://api.marketstack.com/v1/tickers/${req.params.stockid}/intraday/latest?access_key=${marketstack}&interval=15min`;
     const response = await fetch(url);
     const data = await response.json();
-    console.log(data)
 
     if (data.error) {
       res.status(404).json({message: "Invalid symblol", status: 404})
     } else {
-    const stockinfo = data.data[0]
+    const stockinfo = data
     res.json(stockinfo);
   }
   }))
