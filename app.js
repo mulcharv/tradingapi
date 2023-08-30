@@ -98,6 +98,7 @@ passport.use(new LocalStrategy(
     }
   }));
 
+  //implement error message of duplicate username in front end if 500 server error is sent 
   app.post('/signup', upload.any(), [
     body("username", 'Username must not be empty')
     .trim()
@@ -144,7 +145,7 @@ passport.use(new LocalStrategy(
     })
   ])
 
-  app.post("/login", async(req, res, next) => {
+  app.post("/login", upload.any(), async(req, res, next) => {
     passport.authenticate(
       'local', {session: false}, async(err, user, info) => {
         if (!user || err) {
