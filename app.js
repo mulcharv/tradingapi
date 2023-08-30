@@ -21,6 +21,9 @@ const mongoDB = process.env.MONGODB_URI || dev_db_url;
 const marketstack = process.env.MARKETSTACK
 const helmet = require("helmet");
 const RateLimit = require("express-rate-limit");
+const multer = require('multer');
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 const cors = require('cors');
 const fetch = (...args) =>
 	import('node-fetch').then(({default: fetch}) => fetch(...args));
@@ -95,7 +98,7 @@ passport.use(new LocalStrategy(
     }
   }));
 
-  app.post('/signup', [
+  app.post('/signup', upload.any(), [
     body("username", 'Username must not be empty')
     .trim()
     .isLength({ min: 1 })
