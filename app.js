@@ -242,7 +242,7 @@ app.put('/account/:userid', upload.any(), passport.authenticate('jwt',  {session
 
       if (action === 'add') {
         let total = balance + amount;
-        let updatedacc = await Account.findByIdAndUpdate(req.params.accountid, { balance: total});
+        let updatedacc = await Account.findByIdAndUpdate(account._id, { balance: total});
         res.json(updatedacc);
       } 
       if (action === 'withdraw') {
