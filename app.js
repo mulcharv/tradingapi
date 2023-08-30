@@ -190,8 +190,7 @@ passport.use(new LocalStrategy(
     if (data.error) {
       res.status(404).json({message: "Invalid symblol", status: 404})
     } else {
-    const stockinfo = data
-    res.json(stockinfo);
+    res.json(data);
   }
   }));
 
@@ -210,7 +209,7 @@ app.get('/stocks/:stockid/:interval', passport.authenticate('jwt',  {session: fa
   const data = await response.json();
 
   if (data.error) {
-    res.status(404).json({message: "Could not find data", status: 404})
+    res.status(404).json(data.error)
   } else {
     const stockinfo = data.data;
     res.json(stockinfo)
