@@ -19,7 +19,6 @@ require('dotenv').config();
 const dev_db_url = process.env.MONGOURL;
 const mongoDB = process.env.MONGODB_URI || dev_db_url;
 const marketstack = process.env.MARKETSTACK
-const compression = require("compression");
 const helmet = require("helmet");
 const RateLimit = require("express-rate-limit");
 const multer = require('multer');
