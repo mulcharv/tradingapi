@@ -177,8 +177,7 @@ passport.use(new LocalStrategy(
     if (data.error) {
       res.status(404).json({message: "Invalid symblol", status: 404})
     } else {
-    const stockinfo = data
-    res.json(stockinfo);
+    res.json(data);
   }
   }))
 
@@ -191,7 +190,7 @@ passport.use(new LocalStrategy(
     if (data.error) {
       res.status(404).json({message: "Invalid symblol", status: 404})
     } else {
-    const stockinfo = data.data[0]
+    const stockinfo = data
     res.json(stockinfo);
   }
   }));
