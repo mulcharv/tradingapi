@@ -218,7 +218,7 @@ app.get('/stocks/:stockid/:interval', passport.authenticate('jwt',  {session: fa
   }
 }));
 
-app.put('/account/:userid', passport.authenticate('jwt',  {session: false}), [
+app.put('/account/:userid', upload.any(), passport.authenticate('jwt',  {session: false}), [
   body("amount")
   .trim()
   .isInt({min: 0, max: 5000})
