@@ -139,7 +139,7 @@ passport.use(new LocalStrategy(
           user: user._id
         });
         await portfolio.save();
-        res.json(newuser);
+        res.json(user);
       }
     })
   ])
