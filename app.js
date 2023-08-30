@@ -203,8 +203,10 @@ app.get('/stocks/:stockid/:interval', passport.authenticate('jwt',  {session: fa
   const firstDateCalc = currDateNum - firstDateNum;
   const dateFrom = new Date(firstDateCalc);
   const dateFromfmt = dateFrom.toISOString().slice(0, -5);
+  const dateFromfnl = dateFromfmt.replace('T', ' ');
   const dateTofmt = currDate.toISOString().slice(0, -5);
-  const url = `https://api.marketstack.com/v1/eod?access_key=${marketstack}&symbols=${req.params.stockid}&date_from=${dateFromfmt}&date_to=${dateTofmt}`
+  const dateTofnl = dateTofmt.replace('T', ' ')
+  const url = `https://api.marketstack.com/v1/eod?access_key=${marketstack}&symbols=${req.params.stockid}&date_from=${dateFromfnl}&date_to=${dateTofnl}`
   const response = await fetch(url);
   const data = await response.json();
 
