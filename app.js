@@ -235,7 +235,7 @@ app.put('/account/:userid', upload.any(), passport.authenticate('jwt',  {session
       });
       return;
     } else {
-      if (account.user === req.body.userid) {
+      if (account.user.toString() === req.body.userid) {
       let balance = account.balance;
       let amount = req.body.amount;
       let action = req.body.action;
