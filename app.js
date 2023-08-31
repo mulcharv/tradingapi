@@ -286,10 +286,7 @@ app.put('/portfolio/:stockid', upload.any(), passport.authenticate('jwt',  {sess
   }
   if (action === 'buy') {
     if (exists === false) {
-      res.json({
-        total: total,
-        balance: balance
-      })
+      res.json(exists)
     }
   }
 }));
