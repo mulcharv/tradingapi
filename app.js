@@ -285,9 +285,7 @@ app.put('/portfolio/:stockid', upload.any(), passport.authenticate('jwt',  {sess
   }
   }
 
-  if (action == 'buy') {
-    res.json('reached')
-  }
+  res.json(action)
 }));
 
 app.get('/account/:userid', passport.authenticate('jwt',  {session: false}), asyncHandler(async(req, res, next) => {
