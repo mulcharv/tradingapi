@@ -273,10 +273,10 @@ app.put('/portfolio/:stockid', upload.any(), passport.authenticate('jwt',  {sess
 
   let total = quantity*price;
   let balance = account.balance;
-  res.json(balance);
+
+  const position = await Position.findOne({ticker: ticker}).exec();
 
   if (action === 'buy') {
-  
   if (position === null) {
     if (total <= balance) {
     let newpos = new Position({
