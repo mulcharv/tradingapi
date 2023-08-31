@@ -250,7 +250,7 @@ app.put('/account/:userid', upload.any(), passport.authenticate('jwt',  {session
         if (total < 0) {
           res.status(403).json({message: "Cannot withdraw more than balance in account", status: 403})
         } else {
-          let updatedacc = await Account.findByIdAndUpdate(req.params.accountid, { balance: total});
+          let updatedacc = await Account.findByIdAndUpdate(account._id, { balance: total});
           res.json(updatedacc);
         }
       }
