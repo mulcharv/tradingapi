@@ -262,14 +262,15 @@ app.put('/account/:userid', upload.any(), passport.authenticate('jwt',  {session
   })
 ]);
 
-app.put('/portfolio/:stockid', passport.authenticate('jwt',  {session: false}), asyncHandler(async(req, res, next) => {
+app.put('/portfolio/:stockid/:userid', passport.authenticate('jwt',  {session: false}), asyncHandler(async(req, res, next) => {
   let quantity = req.body.quantity;
   let ticker = req.params.stockid;
   let price = req.body.price;
   let action = req.body.action;
-  let userid = req.body.userid;
+  let userid = req.params.userid;
 
-  const [position, account] = await Promise.all([Position.findOne({ticker: ticker}).exec(), Account.findOne({user: userid}).exec()]);
+  const position = await Position.findOne({ticker: ticker}).exec();
+  const account = await Account.findOne({user: userid}).exec();
   let total = quantity*price;
   let balance = account.balance;
 
