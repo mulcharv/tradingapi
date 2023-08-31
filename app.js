@@ -274,18 +274,6 @@ app.put('/portfolio/:stockid', upload.any(), passport.authenticate('jwt',  {sess
   let total = quantity*price;
   let balance = account.balance;
 
-  const userptf = await Portfolio.findOne({user: userid}).exec();
-  let exists = false;
-  let portfoliopst = userptf.positions;
-
-  if (portfoliopst.length > 0) {
-  for (const pst of portfoliopst) {
-    if (pst.ticker === ticker) {
-      exists = true
-    }
-  }
-  };
-
 
   if (action === 'buy') {
   
