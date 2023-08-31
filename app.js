@@ -273,77 +273,7 @@ app.put('/portfolio/:stockid', upload.any(), passport.authenticate('jwt',  {sess
 
   let total = Number(quantity)*Number(price);
   let balance = account.balance;
-
-  const userptf = await Portfolio.findOne({user: userid}).exec();
-  let exists = false;
-  let portfoliopst = userptf.positions;
-
-  if (portfoliopst.length > 0) {
-  for (const pst of portfoliopst) {
-    if (pst.ticker === ticker) {
-      exists = true
-    }
-  }
-  };
-
-
-  if (action === 'buy') {
-  
-  if (exists === false) {
-    if (total <= balance) {
-    let newpos = new Position({
-      ticker: ticker,
-      quantity: quantity,
-      value: total,
-      realized: 0,
-    })
-    let uptbal = balance - total;
-    const portfolio = await Portfolio.findOneAndUpdate({user: userid}, {$push: {positions: newpos}})
-    const updacc = await Account.findOneAndUpdate({user: userid}, {$set: {balance: uptbal}});
-    res.json(portfolio)
-  }
-  if (total > balance) {
-    res.status(403).json({message: 'Attempted purchase more than balance in account', status: 403});
-  }
-  }
-  else {
-    const position = await Position.findOne({ticker: ticker}).exec();
-    if (total <= balance) {
-      let currqnt = position.quantity;
-      let updqnt = currqnt + quantity;
-      let currval = position.value;
-      let updval = total + currval;
-      let uptbal = balance - total;
-
-      const updpos = await Position.findOneAndUpdate({ticker: ticker}, {$set: {quantity: updqnt, value: updval}});
-      const updacc = await Account.findOneAndUpdate({user: userid}, {$set: {balance: uptbal}});
-      res.json(updpos);
-    }
-    if (total > balance) {
-      res.status(403).json({message: 'Attempted purchase more than balance in account', status: 403});
-    }
-  }
-}
-
-if (action === 'sell') {
-  const position = await Position.findOne({ticker: ticker}).exec();
-  if (quantity <= position.quantity) {
-    let currqnt = position.quantity;
-    let updqnt = currqnt - quantity;
-    let currval = position.value;
-    let updval = currval - total; 
-    let uptbal = balance + total;
-    let nowreal = total - ((currval/currqnt)*quantity);
-    let updreal = position.realized + nowreal;
-    
-    const updpos = await Position.findOneAndUpdate({ticker: ticker}, {$set: {quantity: updqnt, value: updval, realized:updreal}});
-    const updacc = await Account.findOneAndUpdate({user: userid}, {$set: {balance: uptbal}});
-    res.json(updpos);
-  }
-  if (quantity > position.quantity) {
-    res.status(403).json({message: 'Attempted to sell more shares than owned in account', status: 403});
-  } 
-}
+  res.json({total: total, balance: balance})
 }));
 
 app.get('/account/:userid', passport.authenticate('jwt',  {session: false}), asyncHandler(async(req, res, next) => {
