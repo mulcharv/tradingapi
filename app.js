@@ -269,10 +269,11 @@ app.put('/portfolio/:stockid', upload.any(), passport.authenticate('jwt',  {sess
   let action = req.body.action;
   let userid = req.body.userid;
 
-  const [position, account] = await Promise.all([Position.findOne({ticker: ticker}), Account.findOne({user: userid})]);
+  const account = await Account.findOne({user: userid}).exec();
 
   let total = quantity*price;
   let balance = account.balance;
+  res.json(balance);
 
   if (action === 'buy') {
   
