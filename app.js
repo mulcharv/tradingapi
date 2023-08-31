@@ -274,11 +274,20 @@ app.put('/portfolio/:stockid', upload.any(), passport.authenticate('jwt',  {sess
   let total = quantity*price;
   let balance = account.balance;
 
-  const position = await Position.findOne({ticker: ticker}).exec();
+  const userptf = await Portfolio.findOne({user: userid}).exec();
+  let exists = false;
+  let portfoliopst = userptf.positions;
+
+  for (const pst of portfoliopst) {
+    if (pst.ticker === ticker) {
+      exists = true
+    }
+  };
+
 
   if (action === 'buy') {
   
-  if (position === null) {
+  if (exists === false) {
     if (total <= balance) {
     let newpos = new Position({
       ticker: ticker,
@@ -296,6 +305,7 @@ app.put('/portfolio/:stockid', upload.any(), passport.authenticate('jwt',  {sess
   }
   }
   else {
+    const position = await Position.findOne({ticker: ticker}).exec();
     if (total <= balance) {
       let currqnt = position.quantity;
       let updqnt = currqnt + quantity;
