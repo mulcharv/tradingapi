@@ -269,9 +269,7 @@ app.put('/portfolio/:stockid', passport.authenticate('jwt',  {session: false}), 
   let action = req.body.action;
   let userid = req.body.userid;
 
-  const position = await Position.findOne({ticker: ticker}).exec();
-  const account = await Account.findOne({user: userid}).exec();
-  res.json(account);
+  const [position, account] = await ([Position.findOne({ticker: ticker}).exec(), Account.findOne({user: userid}).exec()]);
   let total = quantity*price;
   let balance = account.balance;
 
