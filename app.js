@@ -274,7 +274,17 @@ app.put('/portfolio/:stockid', upload.any(), passport.authenticate('jwt',  {sess
   let total = Number(quantity)*Number(price);
   let balance = account.balance;
   const userptf = await Portfolio.findOne({user: userid}).exec();
-  res.json(userptf)
+  let exists = false;
+  let portfoliopst = userptf.positions;
+
+  if (portfoliopst.length > 0) {
+  for (const pst of portfoliopst) {
+    if (pst.ticker === ticker) {
+      exists = true
+    }
+  }
+  }
+  res.json(exists)
 }));
 
 app.get('/account/:userid', passport.authenticate('jwt',  {session: false}), asyncHandler(async(req, res, next) => {
