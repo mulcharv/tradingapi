@@ -278,10 +278,12 @@ app.put('/portfolio/:stockid', upload.any(), passport.authenticate('jwt',  {sess
   let exists = false;
   let portfoliopst = userptf.positions;
 
+  if (portfoliopst.length > 0) {
   for (const pst of portfoliopst) {
     if (pst.ticker === ticker) {
       exists = true
     }
+  }
   };
 
 
