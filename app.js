@@ -287,7 +287,7 @@ app.put('/portfolio/:stockid', upload.any(), passport.authenticate('jwt',  {sess
   if (action === 'buy') {
     if (exists === false) {
       if (total <= balance) {
-        res.json(true)
+        res.json(exists)
       }
     }
   }
