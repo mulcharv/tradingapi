@@ -285,7 +285,7 @@ app.put('/portfolio/:stockid', upload.any(), passport.authenticate('jwt',  {sess
   }
   }
 
-  res.json(total)
+  res.json(price)
 }));
 
 app.get('/account/:userid', passport.authenticate('jwt',  {session: false}), asyncHandler(async(req, res, next) => {
