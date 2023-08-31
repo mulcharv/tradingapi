@@ -284,7 +284,11 @@ app.put('/portfolio/:stockid', upload.any(), passport.authenticate('jwt',  {sess
     }
   }
   }
-  res.json(exists)
+  if (action === 'buy') {
+    if (exists === false) {
+      res.json(exists)
+    }
+  }
 }));
 
 app.get('/account/:userid', passport.authenticate('jwt',  {session: false}), asyncHandler(async(req, res, next) => {
