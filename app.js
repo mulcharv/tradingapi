@@ -273,7 +273,8 @@ app.put('/portfolio/:stockid', upload.any(), passport.authenticate('jwt',  {sess
 
   let total = Number(quantity)*Number(price);
   let balance = account.balance;
-  res.json({total: total, balance: balance})
+  const userptf = await Portfolio.findOne({user: userid}).exec();
+  res.json(userptf)
 }));
 
 app.get('/account/:userid', passport.authenticate('jwt',  {session: false}), asyncHandler(async(req, res, next) => {
