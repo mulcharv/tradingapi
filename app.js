@@ -321,7 +321,7 @@ app.put('/portfolio/:stockid', upload.any(), passport.authenticate('jwt',  {sess
             pst = updpos
           }
         }
-        const updprt = await Portfolio.findByIdAndUpdate({user: userid}, {$set: {positions: portfoliopst}});
+        const updprt = await Portfolio.findOneAndUpdate({user: userid}, {$set: {positions: portfoliopst}});
         const updacc = await Account.findOneAndUpdate({user: userid}, {$set: {balance: uptbal}});
         res.json(updpos);
       }
@@ -349,7 +349,7 @@ app.put('/portfolio/:stockid', upload.any(), passport.authenticate('jwt',  {sess
           pst = updpos
         }
       }
-      const updprt = await Portfolio.findByIdAndUpdate({user: userid}, {$set: {positions: portfoliopst}});
+      const updprt = await Portfolio.findOneAndUpdate({user: userid}, {$set: {positions: portfoliopst}});
       const updacc = await Account.findOneAndUpdate({user: userid}, {$set: {balance: uptbal}});
       res.json(updpos);
     }
