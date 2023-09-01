@@ -342,6 +342,7 @@ app.put('/portfolio/:stockid', upload.any(), passport.authenticate('jwt',  {sess
       let uptbal = balance + total;
       let nowreal = total - ((currval/currqnt)*quantity);
       let updreal = position.realized + nowreal;
+      let totalreal = userptf.realizedTot + nowreal;
       
       const updpos = await Position.findOneAndUpdate({ticker: ticker, user: userid}, {$set: {quantity: updqnt, value: updval, realized:updreal}}, {returnDocument: 'after'});
       for (const pst of portfoliopst) {
@@ -349,7 +350,7 @@ app.put('/portfolio/:stockid', upload.any(), passport.authenticate('jwt',  {sess
           pst = updpos
         }
       }
-      const updprt = await Portfolio.findOneAndUpdate({user: userid}, {$set: {positions: portfoliopst}});
+      const updprt = await Portfolio.findOneAndUpdate({user: userid}, {$set: {positions: portfoliopst, realizedTot: totalreal}});
       const updacc = await Account.findOneAndUpdate({user: userid}, {$set: {balance: uptbal}});
       res.json(updpos);
     }
