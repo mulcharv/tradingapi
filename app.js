@@ -298,7 +298,7 @@ app.put('/portfolio/:stockid', upload.any(), passport.authenticate('jwt',  {sess
       })
       await newpos.save();
       let uptbal = balance - total;
-      const portfolio = await Portfolio.findOneAndUpdate({user: userid}, {$push: {positions: newpos}})
+      const portfolio = await Portfolio.findOneAndUpdate({user: userid}, {$push: {positions: newpos}});
       const updacc = await Account.findOneAndUpdate({user: userid}, {$set: {balance: uptbal}});
       res.json(portfolio)
     }
@@ -315,7 +315,13 @@ app.put('/portfolio/:stockid', upload.any(), passport.authenticate('jwt',  {sess
         let updval = total + currval;
         let uptbal = balance - total;
   
-        const updpos = await Position.findOneAndUpdate({ticker: ticker, user: userid}, {$set: {quantity: updqnt, value: updval}});
+        const updpos = await Position.findOneAndUpdate({ticker: ticker, user: userid}, {$set: {quantity: updqnt, value: updval}}, {returnDocument: 'after'});
+        for (const pst of portfoliopst) {
+          if (pst._id === updpos._id) {
+            pst = updpos
+          }
+        }
+        const updprt = await Portfolio.findByIdAndUpdate({user: userid}, {$set: {positions: portfoliopst}});
         const updacc = await Account.findOneAndUpdate({user: userid}, {$set: {balance: uptbal}});
         res.json(updpos);
       }
@@ -337,7 +343,13 @@ app.put('/portfolio/:stockid', upload.any(), passport.authenticate('jwt',  {sess
       let nowreal = total - ((currval/currqnt)*quantity);
       let updreal = position.realized + nowreal;
       
-      const updpos = await Position.findOneAndUpdate({ticker: ticker, user: userid}, {$set: {quantity: updqnt, value: updval, realized:updreal}});
+      const updpos = await Position.findOneAndUpdate({ticker: ticker, user: userid}, {$set: {quantity: updqnt, value: updval, realized:updreal}}, {returnDocument: 'after'});
+      for (const pst of portfoliopst) {
+        if (pst._id === updpos._id) {
+          pst = updpos
+        }
+      }
+      const updprt = await Portfolio.findByIdAndUpdate({user: userid}, {$set: {positions: portfoliopst}});
       const updacc = await Account.findOneAndUpdate({user: userid}, {$set: {balance: uptbal}});
       res.json(updpos);
     }
