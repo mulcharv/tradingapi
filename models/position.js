@@ -7,6 +7,7 @@ const PositionSchema = new Schema({
     quantity: { type: Number, required: true, min: 1},
     value: { type: Number, required: true, min: 0},
     realized: { type: Number},
+    user: { type: Schema.Types.ObjectId, ref: "User" }
 });
 
 

@@ -137,7 +137,8 @@ passport.use(new LocalStrategy(
         });
         await account.save();
         const portfolio = new Portfolio({
-          user: user._id
+          user: user._id,
+          realizedTot: 0,
         });
         await portfolio.save();
         res.json(user);
@@ -288,12 +289,14 @@ app.put('/portfolio/:stockid', upload.any(), passport.authenticate('jwt',  {sess
   
     if (exists === false) {
       if (total <= balance) {
-      let newpos = new Position({
+      const newpos = new Position({
         ticker: ticker,
         quantity: quantity,
         value: total,
         realized: 0,
+        user: userid
       })
+      await newpos.save();
       let uptbal = balance - total;
       const portfolio = await Portfolio.findOneAndUpdate({user: userid}, {$push: {positions: newpos}})
       const updacc = await Account.findOneAndUpdate({user: userid}, {$set: {balance: uptbal}});
@@ -304,7 +307,7 @@ app.put('/portfolio/:stockid', upload.any(), passport.authenticate('jwt',  {sess
     }
     }
     else {
-      const position = await Position.findOne({ticker: ticker}).exec();
+      const position = await Position.findOne({ticker: ticker, user: userid}).exec();
       if (total <= balance) {
         let currqnt = position.quantity;
         let updqnt = currqnt + quantity;
@@ -312,7 +315,7 @@ app.put('/portfolio/:stockid', upload.any(), passport.authenticate('jwt',  {sess
         let updval = total + currval;
         let uptbal = balance - total;
   
-        const updpos = await Position.findOneAndUpdate({ticker: ticker}, {$set: {quantity: updqnt, value: updval}});
+        const updpos = await Position.findOneAndUpdate({ticker: ticker, user: userid}, {$set: {quantity: updqnt, value: updval}});
         const updacc = await Account.findOneAndUpdate({user: userid}, {$set: {balance: uptbal}});
         res.json(updpos);
       }
@@ -323,8 +326,8 @@ app.put('/portfolio/:stockid', upload.any(), passport.authenticate('jwt',  {sess
   }
   
   if (action === 'sell') {
-    res.json(ticker)
-    const position = await Position.findOne({ticker: ticker}).exec();
+    const position = await Position.findOne({ticker: ticker, user: userid}).exec();
+    
     if (quantity <= position.quantity) {
       let currqnt = position.quantity;
       let updqnt = currqnt - quantity;
@@ -334,7 +337,7 @@ app.put('/portfolio/:stockid', upload.any(), passport.authenticate('jwt',  {sess
       let nowreal = total - ((currval/currqnt)*quantity);
       let updreal = position.realized + nowreal;
       
-      const updpos = await Position.findOneAndUpdate({ticker: ticker}, {$set: {quantity: updqnt, value: updval, realized:updreal}});
+      const updpos = await Position.findOneAndUpdate({ticker: ticker, user: userid}, {$set: {quantity: updqnt, value: updval, realized:updreal}});
       const updacc = await Account.findOneAndUpdate({user: userid}, {$set: {balance: uptbal}});
       res.json(updpos);
     }
