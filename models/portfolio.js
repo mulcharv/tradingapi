@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const Position = require('./position');
+const Position = require('./position').schema;
 
 const Schema = mongoose.Schema;
 
