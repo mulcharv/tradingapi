@@ -1,16 +1,13 @@
 const mongoose = require("mongoose");
 
+const Position = require('./position');
+
 const Schema = mongoose.Schema;
 
 const PortfolioSchema = new Schema({
     positions: [
-            {
-            ticker: String,
-            quantity: Number,
-            value: Number,
-            realized: Number
-        }
-    ],
+            Position
+],
     realizedTot: { type: Number },
     user: { type: Schema.Types.ObjectId, ref: "User" }
 
