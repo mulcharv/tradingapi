@@ -264,15 +264,15 @@ app.put('/account/:userid', upload.any(), passport.authenticate('jwt',  {session
 ]);
 
 app.put('/portfolio/:stockid', upload.any(), passport.authenticate('jwt',  {session: false}), asyncHandler(async(req, res, next) => {
-  let quantity = req.body.quantity;
+  let quantity = Number(req.body.quantity);
   let ticker = req.params.stockid;
-  let price = req.body.price;
+  let price = Number(req.body.price);
   let action = req.body.action;
   let userid = req.body.userid;
 
   const account = await Account.findOne({user: userid}).exec();
 
-  let total = Number(quantity)*Number(price);
+  let total = quantity*price;
   let balance = account.balance;
   const userptf = await Portfolio.findOne({user: userid}).exec();
   let exists = false;
