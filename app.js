@@ -342,11 +342,8 @@ app.put('/portfolio/:stockid', upload.any(), passport.authenticate('jwt',  {sess
       let totalreal = userptf.realizedTot + nowreal;
       
       const updpos = await Position.findOneAndUpdate({ticker: ticker, user: userid}, {$set: {quantity: updqnt, value: updval, realized:updreal}}, {returnDocument: 'after'});
-      for (const pst of portfoliopst) {
-        if (pst._id === updpos._id) {
-          pst = updpos
-        }
-      }
+      let pstindex = portfoliopst.findIndex(element => element.ticker === ticker);
+      portfoliopst[pstindex] = updpos; 
       const updprt = await Portfolio.findOneAndUpdate({user: userid}, {$set: {positions: portfoliopst, realizedTot: totalreal}});
       const updacc = await Account.findOneAndUpdate({user: userid}, {$set: {balance: uptbal}});
       res.json(updpos);
