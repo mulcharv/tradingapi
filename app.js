@@ -323,6 +323,7 @@ app.put('/portfolio/:stockid', upload.any(), passport.authenticate('jwt',  {sess
   }
   
   if (action === 'sell') {
+    res.json(ticker)
     const position = await Position.findOne({ticker: ticker}).exec();
     if (quantity <= position.quantity) {
       let currqnt = position.quantity;
