@@ -377,7 +377,7 @@ app.get('/position/:stockid/:userid', passport.authenticate('jwt',  {session: fa
 app.get('/portfolio/:userid', passport.authenticate('jwt',  {session: false}), asyncHandler(async(req, res, next) => {
   const portfolio = await Portfolio.findOne({user: req.params.userid}).exec();
 
-  if (position === null) {
+  if (portfolio === null) {
     return res.status(404).json({message: 'Portfolio not found', status: 404})
   }
 
