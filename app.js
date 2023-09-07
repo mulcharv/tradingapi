@@ -13,6 +13,7 @@ const JWTStrategy = require('passport-jwt').Strategy;
 const ExtractJWT = require('passport-jwt').ExtractJwt;
 const bcrypt = require('bcryptjs');
 const jwt_decode = require("jwt-decode");
+const { DateTime } = require("luxon");
 const mongoose = require("mongoose");
 mongoose.set("strictQuery", false);
 require('dotenv').config();
@@ -33,6 +34,8 @@ const Stock = require("./models/stock");
 const Account = require("./models/account");
 const Portfolio = require("./models/portfolio");
 const Position = require('./models/position');
+const Watchlist = require('./models/watchlist');
+const Activity = require("./models/activity");
 
 mongoose.connect(mongoDB, { useUnifiedTopology: true, useNewUrlParser: true });
 const db = mongoose.connection;
@@ -141,6 +144,14 @@ passport.use(new LocalStrategy(
           realizedTot: 0,
         });
         await portfolio.save();
+        const watchlist = new Watchlist({
+          user: user._id
+        })
+        await watchlist.save();
+        const activity = new Activity({
+          user: user._id
+        })
+        await activity.save();
         res.json(user);
       }
     })
@@ -240,10 +251,18 @@ app.put('/account/:userid', upload.any(), passport.authenticate('jwt',  {session
       let balance = account.balance;
       let amount = req.body.amount;
       let action = req.body.action;
+      let date = new Date();
+      let datefmt = DateTime.fromJSDate(date).toLocaleString(DateTime.DATE_MED);
 
       if (action === 'add') {
         let total = balance + amount;
         let updatedacc = await Account.findByIdAndUpdate(account._id, { balance: total});
+        let event = {
+          action: 'Deposit',
+          amount: amount,
+          date: datefmt,
+        }
+        let docaction = await Activity.findOneAndUpdate({user: req.params.userid}, {$push: {actions: event}})
         res.json(updatedacc);
       } 
       if (action === 'withdraw') {
@@ -252,6 +271,12 @@ app.put('/account/:userid', upload.any(), passport.authenticate('jwt',  {session
           res.status(403).json({message: "Cannot withdraw more than balance in account", status: 403})
         } else {
           let updatedacc = await Account.findByIdAndUpdate(account._id, { balance: total});
+          let event = {
+            action: 'Withdrawal',
+            amount: amount,
+            date: datefmt,
+          }
+          let docaction = await Activity.findOneAndUpdate({user: req.params.userid}, {$push: {actions: event}})
           res.json(updatedacc);
         }
       }
@@ -269,6 +294,8 @@ app.put('/portfolio/:stockid', upload.any(), passport.authenticate('jwt',  {sess
   let price = Number(req.body.price);
   let action = req.body.action;
   let userid = req.body.userid;
+  let date = new Date();
+  let datefmt = DateTime.fromJSDate(date).toLocaleString(DateTime.DATE_MED);
 
   const account = await Account.findOne({user: userid}).exec();
 
@@ -300,6 +327,12 @@ app.put('/portfolio/:stockid', upload.any(), passport.authenticate('jwt',  {sess
       let uptbal = balance - total;
       const portfolio = await Portfolio.findOneAndUpdate({user: userid}, {$push: {positions: newpos}});
       const updacc = await Account.findOneAndUpdate({user: userid}, {$set: {balance: uptbal}});
+      let event = {
+        action: `${ticker} Buy ${quantity} shares`,
+        amount: total,
+        date: datefmt,
+      }
+      let docaction = await Activity.findOneAndUpdate({user: req.params.userid}, {$push: {actions: event}})
       res.json(portfolio)
     }
     if (total > balance) {
@@ -320,6 +353,12 @@ app.put('/portfolio/:stockid', upload.any(), passport.authenticate('jwt',  {sess
         portfoliopst[pstindex] = updpos; 
         const updprt = await Portfolio.findOneAndUpdate({user: userid}, {$set: {positions: portfoliopst}});
         const updacc = await Account.findOneAndUpdate({user: userid}, {$set: {balance: uptbal}});
+        let event = {
+          action: `${ticker} Buy ${quantity} shares`,
+          amount: total,
+          date: datefmt,
+        }
+        let docaction = await Activity.findOneAndUpdate({user: req.params.userid}, {$push: {actions: event}})
         res.json(updpos);
       }
       if (total > balance) {
@@ -346,6 +385,12 @@ app.put('/portfolio/:stockid', upload.any(), passport.authenticate('jwt',  {sess
       portfoliopst[pstindex] = updpos; 
       const updprt = await Portfolio.findOneAndUpdate({user: userid}, {$set: {positions: portfoliopst, realizedTot: totalreal}});
       const updacc = await Account.findOneAndUpdate({user: userid}, {$set: {balance: uptbal}});
+      let event = {
+        action: `${ticker} Sell ${quantity} shares`,
+        amount: total,
+        date: datefmt,
+      }
+      let docaction = await Activity.findOneAndUpdate({user: req.params.userid}, {$push: {actions: event}})
       res.json(updpos);
     }
     if (quantity > position.quantity) {
