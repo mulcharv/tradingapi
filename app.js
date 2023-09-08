@@ -427,6 +427,51 @@ app.get('/portfolio/:userid', passport.authenticate('jwt',  {session: false}), a
   }
 
   res.json(portfolio);
-}))
+}));
+
+app.get('/watchlist/:userid', passport.authenticate('jwt',  {session: false}), asyncHandler(async(req, res, next) => {
+  const watchlist = await Watchlist.findOne({user: req.params.userid}).exec();
+
+  if (watchlist === null) {
+    return res.status(404).json({message: 'Watchlist not found', status: 404})
+  }
+
+  res.json(watchlist);
+}));
+
+app.put('/watchlist/:userid/:stockid', passport.authenticate('jwt',  {session: false}), asyncHandler(async(req, res, next) => {
+  const watchlist = await Watchlist.findOne({user: req.params.userid}).exec();
+  let ticker = req.params.stockid;
+  let action = req.body.action;
+  if (watchlist === null) {
+    return res.status(404).json({message: 'Watchlist not found', status: 404})
+  } else {
+  if (action === 'remove') {
+  let watched = [...watchlist.stocks]
+  let watchedfilt = watched.filter(element => element !== ticker);
+  let updwatchlist = await Watchlist.findOneAndUpdate({user: req.params.userid}, {$set: {stocks: watchedfilt}});
+  
+  res.json(updwatchlist);
+  }
+  if (action === 'add') {
+  let watched = [...watchlist.stocks]
+  if (!watched.includes(ticker)) {
+  watched.push(ticker);
+  let updwatchlist = await Watchlist.findOneAndUpdate({user: req.params.userid}, {$set: {stocks: watched}});
+  res.json(updwatchlist);
+  }
+  }
+  }
+}));
+
+app.get('/activity/:userid', passport.authenticate('jwt',  {session: false}), asyncHandler(async(req, res, next) => {
+  const activity = await Activity.findOne({user: req.params.userid}).exec();
+
+  if (activity === null) {
+    return res.status(404).json({message: 'Activity not found', status: 404})
+  }
+
+  res.json(activity);
+}));
 
 module.exports = app;
