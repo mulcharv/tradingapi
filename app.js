@@ -182,7 +182,7 @@ passport.use(new LocalStrategy(
 
   //Get latest data on a particular stock, updatable every 15 minutes
   app.get('/stocks/:stockid/latestdata', passport.authenticate('jwt',  {session: false}), asyncHandler(async(req, res, next) => {
-    const url = `https://api.marketstack.com/v1/tickers/${req.params.stockid}/intraday/latest?access_key=${marketstack}&interval=15min`;
+    const url = `https://api.marketstack.com/v1/tickers/${req.params.stockid}/intraday/latest?access_key=${marketstack}&interval=1min`;
     const response = await fetch(url);
     const data = await response.json();
 
@@ -207,6 +207,31 @@ passport.use(new LocalStrategy(
   }));
 
 app.get('/stocks/:stockid/:interval', passport.authenticate('jwt',  {session: false}), asyncHandler(async(req, res, next) => {
+  if (req.params.interval === 1) {
+    
+    const url = `https://api.marketstack.com/v1/intraday?access_key=${marketstack}$symbols=${req.params.stockid}&interval=5min`;
+    const response = await fetch(url);
+    const data = await response.json();
+    if (data.error) {
+      res.status(404).json(data.error)
+    } else {
+      const stockinfo = data.data;
+      let dailydata = [];
+      let recentdate = stockinfo[0].date;
+      let datefmt = recentdate.slice(0,10);
+      for (const entry of stockinfo) {
+        let entrydate = entry.date.slice(0,10);
+        if (entrydate === datefmt) {
+          dailydata.push(entry);
+        } else {
+          break;
+        }
+      }
+      res.json(dailydata)
+    }
+  }
+
+  else {
   const currDate = new Date();
   const currDateNum = currDate.getTime();
   const firstDate = req.params.interval;
@@ -217,8 +242,14 @@ app.get('/stocks/:stockid/:interval', passport.authenticate('jwt',  {session: fa
   const dateFromfmt = dateFrom.toISOString().slice(0, -5);
   const dateFromfnl = dateFromfmt.replace('T', ' ');
   const dateTofmt = currDate.toISOString().slice(0, -5);
-  const dateTofnl = dateTofmt.replace('T', ' ')
-  const url = `https://api.marketstack.com/v1/eod?access_key=${marketstack}&symbols=${req.params.stockid}&date_from=${dateFromfnl}&date_to=${dateTofnl}`
+  const dateTofnl = dateTofmt.replace('T', ' ');
+  let url = '';
+  if (interval === 7) {
+    url = `https://api.marketstack.com/v1/intraday?access_key=${marketstack}&symbols=${req.params.stockid}&date_from=${dateFromfnl}&date_to=${dateTofnl}`;
+  }
+  else {
+    url = `https://api.marketstack.com/v1/intraday?access_key=${marketstack}&symbols=${req.params.stockid}&date_from=${dateFromfnl}&date_to=${dateTofnl}&interval=24hour&limit=370`;
+  }
   const response = await fetch(url);
   const data = await response.json();
 
@@ -228,6 +259,7 @@ app.get('/stocks/:stockid/:interval', passport.authenticate('jwt',  {session: fa
     const stockinfo = data.data;
     res.json(stockinfo)
   }
+}
 }));
 
 app.put('/account/:userid', upload.any(), passport.authenticate('jwt',  {session: false}), [
@@ -325,7 +357,7 @@ app.put('/portfolio/:stockid', upload.any(), passport.authenticate('jwt',  {sess
       })
       await newpos.save();
       let uptbal = balance - total;
-      const portfolio = await Portfolio.findOneAndUpdate({user: userid}, {$push: {positions: newpos}});
+      const portfolio = await Portfolio.findOneAndUpdate({user: userid}, {$push: {positions: newpos}}, {returnDocument: 'after'});
       const updacc = await Account.findOneAndUpdate({user: userid}, {$set: {balance: uptbal}});
       let event = {
         action: `${ticker} Buy ${quantity} shares`,
@@ -351,7 +383,7 @@ app.put('/portfolio/:stockid', upload.any(), passport.authenticate('jwt',  {sess
         const updpos = await Position.findOneAndUpdate({ticker: ticker, user: userid}, {$set: {quantity: updqnt, value: updval}}, {returnDocument: 'after'});
         let pstindex = portfoliopst.findIndex(element => element.ticker === ticker);
         portfoliopst[pstindex] = updpos; 
-        const updprt = await Portfolio.findOneAndUpdate({user: userid}, {$set: {positions: portfoliopst}});
+        const updprt = await Portfolio.findOneAndUpdate({user: userid}, {$set: {positions: portfoliopst}}, {returnDocument: 'after'});
         const updacc = await Account.findOneAndUpdate({user: userid}, {$set: {balance: uptbal}});
         let event = {
           action: `${ticker} Buy ${quantity} shares`,
@@ -359,7 +391,7 @@ app.put('/portfolio/:stockid', upload.any(), passport.authenticate('jwt',  {sess
           date: datefmt,
         }
         let docaction = await Activity.findOneAndUpdate({user: req.params.userid}, {$push: {actions: event}})
-        res.json(updpos);
+        res.json(updprt);
       }
       if (total > balance) {
         res.status(403).json({message: 'Attempted purchase more than balance in account', status: 403});
@@ -379,10 +411,15 @@ app.put('/portfolio/:stockid', upload.any(), passport.authenticate('jwt',  {sess
       let nowreal = total - ((currval/currqnt)*quantity);
       let updreal = position.realized + nowreal;
       let totalreal = userptf.realizedTot + nowreal;
-      
+      if (updqnt > 0) {
       const updpos = await Position.findOneAndUpdate({ticker: ticker, user: userid}, {$set: {quantity: updqnt, value: updval, realized:updreal}}, {returnDocument: 'after'});
       let pstindex = portfoliopst.findIndex(element => element.ticker === ticker);
       portfoliopst[pstindex] = updpos; 
+      }
+      if (updqnt === 0) {
+        let pstindex = portfoliopst.findIndex(element => element.ticker === ticker);
+        portfoliopst.splice(pstindex,1)
+      }
       const updprt = await Portfolio.findOneAndUpdate({user: userid}, {$set: {positions: portfoliopst, realizedTot: totalreal}});
       const updacc = await Account.findOneAndUpdate({user: userid}, {$set: {balance: uptbal}});
       let event = {
@@ -391,7 +428,7 @@ app.put('/portfolio/:stockid', upload.any(), passport.authenticate('jwt',  {sess
         date: datefmt,
       }
       let docaction = await Activity.findOneAndUpdate({user: req.params.userid}, {$push: {actions: event}})
-      res.json(updpos);
+      res.json(updprt);
     }
     if (quantity > position.quantity) {
       res.status(403).json({message: 'Attempted to sell more shares than owned in account', status: 403});
