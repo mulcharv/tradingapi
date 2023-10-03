@@ -263,10 +263,8 @@ app.get('/stocks/:stockid/:interval', passport.authenticate('jwt',  {session: fa
 }));
 
 app.put('/account/:userid', upload.any(), passport.authenticate('jwt',  {session: false}), asyncHandler(async(req, res, next) => {
-
-    const account = await Account.findOne({user: req.params.userid}).exec();
       
-    res.json(account)
+    res.json('reached')
     
   })
 );
