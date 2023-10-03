@@ -265,8 +265,7 @@ app.get('/stocks/:stockid/:interval', passport.authenticate('jwt',  {session: fa
 app.put('/account/:userid', upload.any(), passport.authenticate('jwt',  {session: false}), asyncHandler(async(req, res, next) => {
 
     const account = await Account.findOne({user: req.params.userid}).exec();
-    console.log(account)
-
+      res.json(account);
       if (account.user.toString() === req.params.userid) {
       let balance = account.balance;
       let amount = Number(req.body.amount);
