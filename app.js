@@ -262,12 +262,67 @@ app.get('/stocks/:stockid/:interval', passport.authenticate('jwt',  {session: fa
 }
 }));
 
-app.put('/account/:userid', upload.any(), passport.authenticate('jwt',  {session: false}), asyncHandler(async(req, res, next) => {
-      
-    res.json('reached')
+app.put('/account/:userid', upload.any(), passport.authenticate('jwt',  {session: false}), [
+  body("amount")
+  .exists({checkFalsy: true}).withMessage('You must enter an amount')
+    .custom((value, {req, location, path}) => {
+        const {body: {amount}} = Number(req.body.amount);
+        const amountFloat = amount.toFixed(2);
+        return amountFloat >= 1 && amountFloat <= 5000
+    })
+  .withMessage("Movement of funds are limited to amounts between $1 and $5000"),
+
+  asyncHandler(async(req, res, next) => {
+    const errors = validationResult(req);
+
+    const account = await Account.findOne({user: req.params.userid}).exec();
+
+    if (!errors.isEmpty()) {
+      res.json({
+        errors: errors.array(),
+      });
+      return;
+    } else {
+      if (account.user.toString() === req.params.userid) {
+      let balance = account.balance;
+      let amount = Number(req.body.amount);
+      let action = req.body.action;
+      let date = new Date();
+      let datefmt = DateTime.fromJSDate(date).toLocaleString(DateTime.DATE_MED);
+
+      if (action === 'add') {
+        let total = balance + amount;
+        let updatedacc = await Account.findByIdAndUpdate(account._id, { balance: total});
+        let event = {
+          action: 'Deposit',
+          amount: amount,
+          date: datefmt,
+        }
+        let docaction = await Activity.findOneAndUpdate({user: req.params.userid}, {$push: {actions: event}})
+        res.json(updatedacc);
+      } 
+      if (action === 'withdraw') {
+        let total = balance - amount;
+        if (total < 0) {
+          res.status(403).json({message: "Cannot withdraw more than balance in account", status: 403})
+        } else {
+          let updatedacc = await Account.findByIdAndUpdate(account._id, { balance: total});
+          let event = {
+            action: 'Withdrawal',
+            amount: amount,
+            date: datefmt,
+          }
+          let docaction = await Activity.findOneAndUpdate({user: req.params.userid}, {$push: {actions: event}})
+          res.json(updatedacc);
+        }
+      }
+    } else {
+      res.status(401).json({message: 'Unauthorized to access this account', status: 401})
+    }
+    }
     
   })
-);
+]);
 
 app.put('/portfolio/:stockid', upload.any(), passport.authenticate('jwt',  {session: false}), asyncHandler(async(req, res, next) => {
   let quantity = Number(req.body.quantity);
