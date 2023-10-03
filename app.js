@@ -262,27 +262,10 @@ app.get('/stocks/:stockid/:interval', passport.authenticate('jwt',  {session: fa
 }
 }));
 
-app.put('/account/:userid', upload.any(), passport.authenticate('jwt',  {session: false}), [
-  body("amount")
-  .exists({checkFalsy: true}).withMessage('You must type a rating')
-    .custom((value, {req, location, path}) => {
-        const {body: {amount}} = Number(req.body.amount);
-        const amountFloat = amount.toFixed(2);
-        return amountFloat >= 1 && amountFloat <= 5000
-    })
-  .withMessage("Movement of funds are limited to amounts between $1 and $5000"),
-
-  asyncHandler(async(req, res, next) => {
-    const errors = validationResult(req);
+app.put('/account/:userid', upload.any(), passport.authenticate('jwt',  {session: false}), asyncHandler(async(req, res, next) => {
 
     const account = await Account.findOne({user: req.params.userid}).exec();
 
-    if (!errors.isEmpty()) {
-      res.json({
-        errors: errors.array(),
-      });
-      return;
-    } else {
       if (account.user.toString() === req.params.userid) {
       let balance = account.balance;
       let amount = Number(req.body.amount);
@@ -319,10 +302,9 @@ app.put('/account/:userid', upload.any(), passport.authenticate('jwt',  {session
     } else {
       res.status(401).json({message: 'Unauthorized to access this account', status: 401})
     }
-    }
     
   })
-]);
+);
 
 app.put('/portfolio/:stockid', upload.any(), passport.authenticate('jwt',  {session: false}), asyncHandler(async(req, res, next) => {
   let quantity = Number(req.body.quantity);
