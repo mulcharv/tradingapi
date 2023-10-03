@@ -265,8 +265,8 @@ app.get('/stocks/:stockid/:interval', passport.authenticate('jwt',  {session: fa
 app.put('/account/:userid', upload.any(), passport.authenticate('jwt',  {session: false}), [
   body("amount")
   .exists({checkFalsy: true}).withMessage('You must enter an amount')
-    .custom((value, {req, location, path}) => {
-        const {body: {amount}} = Number(req.body.amount);
+    .custom((value, {req}) => {
+        const amount = Number(value);
         const amountFloat = amount.toFixed(2);
         return amountFloat >= 1 && amountFloat <= 5000
     })
