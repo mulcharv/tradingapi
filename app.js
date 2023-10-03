@@ -264,21 +264,12 @@ app.get('/stocks/:stockid/:interval', passport.authenticate('jwt',  {session: fa
 
 app.put('/account/:userid', upload.any(), passport.authenticate('jwt',  {session: false}), [
   body("amount")
-  .trim()
-  .isInt({min: 0, max: 5000})
-  .withMessage("Movement of funds are limited to amounts between $0 and $5000"),
+  .trim(),
 
   asyncHandler(async(req, res, next) => {
-    const errors = validationResult(req);
 
     const account = await Account.findOne({user: req.params.userid}).exec();
 
-    if (!errors.isEmpty()) {
-      res.json({
-        errors: errors.array(),
-      });
-      return;
-    } else {
       if (account.user.toString() === req.params.userid) {
       let balance = account.balance;
       let amount = req.body.amount;
@@ -314,7 +305,6 @@ app.put('/account/:userid', upload.any(), passport.authenticate('jwt',  {session
       }
     } else {
       res.status(401).json({message: 'Unauthorized to access this account', status: 401})
-    }
     }
     
   })
