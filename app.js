@@ -268,7 +268,7 @@ app.put('/account/:userid', upload.any(), passport.authenticate('jwt',  {session
     .custom((value, {req, location, path}) => {
         const {body: {amount}} = Number(req.body.amount);
         const amountFloat = amount.toFixed(2);
-        return amountFloat >= 1 && ratingFloat <= 5000
+        return amountFloat >= 1 && amountFloat <= 5000
     })
   .withMessage("Movement of funds are limited to amounts between $1 and $5000"),
 
