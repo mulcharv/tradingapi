@@ -292,7 +292,7 @@ app.put('/account/:userid', upload.any(), passport.authenticate('jwt',  {session
 
       if (action === 'add') {
         let total = balance + amount;
-        let updatedacc = await Account.findByIdAndUpdate(account._id, { balance: total});
+        let updatedacc = await Account.findByIdAndUpdate(account._id, { balance: total}, {returnDocument: 'after'});
         let event = {
           action: 'Deposit',
           amount: amount,
@@ -306,7 +306,7 @@ app.put('/account/:userid', upload.any(), passport.authenticate('jwt',  {session
         if (total < 0) {
           res.status(403).json({message: "Cannot withdraw more than balance in account", status: 403})
         } else {
-          let updatedacc = await Account.findByIdAndUpdate(account._id, { balance: total});
+          let updatedacc = await Account.findByIdAndUpdate(account._id, { balance: total}, {returnDocument: 'after'});
           let event = {
             action: 'Withdrawal',
             amount: amount,
