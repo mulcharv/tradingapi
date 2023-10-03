@@ -266,7 +266,7 @@ app.put('/account/:userid', upload.any(), passport.authenticate('jwt',  {session
   body("amount")
   .exists({checkFalsy: true}).withMessage('You must type a rating')
     .custom((value, {req, location, path}) => {
-        const {body: {amount}} = req.body.amount;
+        const {body: {amount}} = Number(req.body.amount);
         const amountFloat = amount.toFixed(2);
         return amountFloat >= 1 && ratingFloat <= 5000
     })
