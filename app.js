@@ -285,7 +285,7 @@ app.put('/account/:userid', upload.any(), passport.authenticate('jwt',  {session
     } else {
       if (account.user.toString() === req.params.userid) {
       let balance = account.balance;
-      let amount = req.body.amount;
+      let amount = Number(req.body.amount);
       let action = req.body.action;
       let date = new Date();
       let datefmt = DateTime.fromJSDate(date).toLocaleString(DateTime.DATE_MED);
