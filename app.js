@@ -223,8 +223,6 @@ app.get('/stocks/:stockid/interval/:intervalid', passport.authenticate('jwt',  {
         let entrydate = entry.date.slice(0,10);
         if (entrydate === datefmt) {
           dailydata.push(entry);
-        } else {
-          break;
         }
       }
       res.json(dailydata)
