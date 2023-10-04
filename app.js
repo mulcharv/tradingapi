@@ -216,16 +216,7 @@ app.get('/stocks/:stockid/interval/:intervalid', passport.authenticate('jwt',  {
       res.status(404).json(data.error)
     } else {
       const stockinfo = data.data;
-      let dailydata = [];
-      let recentdate = stockinfo[0].date;
-      let datefmt = recentdate.slice(0,10);
-      for (const entry of stockinfo) {
-        let entrydate = entry.date.slice(0,10);
-        if (entrydate === datefmt) {
-          dailydata.push(entry);
-        }
-      }
-      res.json(dailydata)
+      res.json(stockinfo)
     }
   }
 
