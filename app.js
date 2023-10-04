@@ -216,7 +216,7 @@ app.get('/stocks/:stockid/interval/:intervalid', passport.authenticate('jwt',  {
       res.status(404).json(data.error)
     } else {
       const stockinfo = data.data;
-      res.json(stockinfo)
+      res.json('testing')
     }
   }
 
