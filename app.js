@@ -215,8 +215,7 @@ app.get('/stocks/:stockid/interval/:intervalid', passport.authenticate('jwt',  {
     if (data.error) {
       res.status(404).json(data.error)
     } else {
-      const stockinfo = data.data;
-      res.json(stockinfo)
+      res.json(data.data)
     }
   }
 
@@ -245,8 +244,7 @@ app.get('/stocks/:stockid/interval/:intervalid', passport.authenticate('jwt',  {
   if (data.error) {
     res.status(404).json(data.error)
   } else {
-    const stockinfo = data.data;
-    res.json(stockinfo)
+    res.json(data.data)
   }
 }
 }));
