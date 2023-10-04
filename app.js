@@ -206,8 +206,8 @@ passport.use(new LocalStrategy(
   }
   }));
 
-app.get('/stocks/:stockid/:interval', passport.authenticate('jwt',  {session: false}), asyncHandler(async(req, res, next) => {
-  if (req.params.interval === 1) {
+app.get('/stocks/:stockid/interval/:intervalid', passport.authenticate('jwt',  {session: false}), asyncHandler(async(req, res, next) => {
+  if (req.params.intervalid === 1) {
     
     const url = `https://api.marketstack.com/v1/intraday?access_key=${marketstack}$symbols=${req.params.stockid}&interval=5min`;
     const response = await fetch(url);
@@ -234,7 +234,7 @@ app.get('/stocks/:stockid/:interval', passport.authenticate('jwt',  {session: fa
   else {
   const currDate = new Date();
   const currDateNum = currDate.getTime();
-  const firstDate = req.params.interval;
+  const firstDate = req.params.intervalid;
   const dayMilliSec = 1*24*60*60*1000
   const firstDateNum = firstDate*dayMilliSec;
   const firstDateCalc = currDateNum - firstDateNum;
