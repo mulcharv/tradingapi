@@ -209,13 +209,13 @@ passport.use(new LocalStrategy(
 app.get('/stocks/:stockid/interval/:intervalid', passport.authenticate('jwt',  {session: false}), asyncHandler(async(req, res, next) => {
   if (req.params.intervalid === 1) {
     
-    const url = `https://api.marketstack.com/v1/intraday?access_key=${marketstack}$symbols=${req.params.stockid}&interval=5min`;
+    const url = `https://api.marketstack.com/v1/intraday?access_key=${marketstack}&symbols=${req.params.stockid}&interval=5min`;
     const response = await fetch(url);
     const data = await response.json();
     if (data.error) {
       res.status(404).json(data.error)
     } else {
-      const stockinfo = data;
+      const stockinfo = data.data;
       let dailydata = [];
       let recentdate = stockinfo[0].date;
       let datefmt = recentdate.slice(0,10);
@@ -256,7 +256,7 @@ app.get('/stocks/:stockid/interval/:intervalid', passport.authenticate('jwt',  {
   if (data.error) {
     res.status(404).json(data.error)
   } else {
-    const stockinfo = data;
+    const stockinfo = data.data;
     res.json(stockinfo)
   }
 }
