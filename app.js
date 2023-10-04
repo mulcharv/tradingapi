@@ -207,7 +207,7 @@ passport.use(new LocalStrategy(
   }));
 
 app.get('/stocks/:stockid/interval/:intervalid', passport.authenticate('jwt',  {session: false}), asyncHandler(async(req, res, next) => {
-  if (req.params.intervalid === 1) {
+  if (Number(req.params.intervalid) === 1) {
     
     const url = `https://api.marketstack.com/v1/intraday?access_key=${marketstack}&symbols=${req.params.stockid}&interval=5min`;
     const response = await fetch(url);
@@ -215,7 +215,17 @@ app.get('/stocks/:stockid/interval/:intervalid', passport.authenticate('jwt',  {
     if (data.error) {
       res.status(404).json(data.error)
     } else {
-      res.json(data.data)
+      const stockinfo = data.data;
+      let dailydata = [];
+      let recentdate = stockinfo[0].date;
+      let datefmt = recentdate.slice(0,10);
+      for (const entry of stockinfo) {
+        let entrydate = entry.date.slice(0,10);
+        if (entrydate === datefmt) {
+          dailydata.push(entry);
+        }
+      }
+      res.json(dailydata)
     }
   }
 
@@ -232,7 +242,7 @@ app.get('/stocks/:stockid/interval/:intervalid', passport.authenticate('jwt',  {
   const dateTofmt = currDate.toISOString().slice(0, -5);
   const dateTofnl = dateTofmt.replace('T', ' ');
   let url = '';
-  if (req.params.intervalid === 7) {
+  if (Number(req.params.intervalid) === 7) {
     url = `https://api.marketstack.com/v1/intraday?access_key=${marketstack}&symbols=${req.params.stockid}&date_from=${dateFromfnl}&date_to=${dateTofnl}`;
   }
   else {
@@ -244,7 +254,8 @@ app.get('/stocks/:stockid/interval/:intervalid', passport.authenticate('jwt',  {
   if (data.error) {
     res.status(404).json(data.error)
   } else {
-    res.json(data.data)
+    const stockinfo = data.data;
+    res.json(stockinfo)
   }
 }
 }));
