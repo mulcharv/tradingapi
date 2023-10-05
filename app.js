@@ -246,7 +246,7 @@ app.get('/stocks/:stockid/interval/:intervalid', passport.authenticate('jwt',  {
     url = `https://api.marketstack.com/v1/intraday?access_key=${marketstack}&symbols=${req.params.stockid}&date_from=${dateFromfnl}&date_to=${dateTofnl}`;
   }
   else {
-    url = `https://api.marketstack.com/v1/intraday?access_key=${marketstack}&symbols=${req.params.stockid}&date_from=${dateFromfnl}&date_to=${dateTofnl}&interval=12hour&limit=1000`;
+    url = `https://api.marketstack.com/v1/intraday?access_key=${marketstack}&symbols=${req.params.stockid}&date_from=${dateFromfnl}&date_to=${dateTofnl}&interval=24hour&limit=370`;
   }
   const response = await fetch(url);
   const data = await response.json();
