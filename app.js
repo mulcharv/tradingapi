@@ -242,7 +242,10 @@ app.get('/stocks/:stockid/interval/:intervalid', passport.authenticate('jwt',  {
   const dateTofmt = currDate.toISOString().slice(0, -5);
   const dateTofnl = dateTofmt.replace('T', ' ');
   let url = '';
-  if (Number(req.params.intervalid) === 30) {
+  if (Number(req.params.intervalid) === 7) {
+    url = `https://api.marketstack.com/v1/intraday?access_key=${marketstack}&symbols=${req.params.stockid}&date_from=${dateFromfnl}&date_to=${dateTofnl}&interval=15min@limit=500`;
+  }
+  else if (Number(req.params.intervalid) === 30) {
     url = `https://api.marketstack.com/v1/intraday?access_key=${marketstack}&symbols=${req.params.stockid}&date_from=${dateFromfnl}&date_to=${dateTofnl}&interval=1hour&limit=300`;
   }
   else {
