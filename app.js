@@ -369,7 +369,7 @@ app.put('/portfolio/:stockid', upload.any(), passport.authenticate('jwt',  {sess
         amount: total,
         date: datefmt,
       }
-      let docaction = await Activity.findOneAndUpdate({user: req.params.userid}, {$push: {actions: event}})
+      let docaction = await Activity.findOneAndUpdate({user: userid}, {$push: {actions: event}})
       res.json(portfolio)
     }
     if (total > balance) {
@@ -395,7 +395,7 @@ app.put('/portfolio/:stockid', upload.any(), passport.authenticate('jwt',  {sess
           amount: total,
           date: datefmt,
         }
-        let docaction = await Activity.findOneAndUpdate({user: req.params.userid}, {$push: {actions: event}})
+        let docaction = await Activity.findOneAndUpdate({user: userid}, {$push: {actions: event}})
         res.json(updprt);
       }
       if (total > balance) {
