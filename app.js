@@ -425,14 +425,14 @@ app.put('/portfolio/:stockid', upload.any(), passport.authenticate('jwt',  {sess
         let pstindex = portfoliopst.findIndex(element => element.ticker === ticker);
         portfoliopst.splice(pstindex,1)
       }
-      const updprt = await Portfolio.findOneAndUpdate({user: userid}, {$set: {positions: portfoliopst, realizedTot: totalreal}});
+      const updprt = await Portfolio.findOneAndUpdate({user: userid}, {$set: {positions: portfoliopst, realizedTot: totalreal}}, {returnDocument: 'after'});
       const updacc = await Account.findOneAndUpdate({user: userid}, {$set: {balance: uptbal}});
       let event = {
         action: `${ticker} Sell ${quantity} shares`,
         amount: total,
         date: datefmt,
       }
-      let docaction = await Activity.findOneAndUpdate({user: req.params.userid}, {$push: {actions: event}})
+      let docaction = await Activity.findOneAndUpdate({user: userid}, {$push: {actions: event}})
       res.json(updprt);
     }
     if (quantity > position.quantity) {
